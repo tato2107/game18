@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aetherium Pixel Odyssey</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-pixel: #05030a;
+            --panel-bg: #0d091a;
+            --panel-border: #3b2d6e;
+            --gold: #fde047;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --accent: #7c3aed;
+            --accent-hover: #6d28d9;
+            --neon-pink: #ec4899;
+            --neon-blue: #38bdf8;
+            --main-font: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            font-family: var(--main-font);
+            background-color: var(--bg-pixel);
+            color: var(--text-main);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            height: 100vh;
+            box-sizing: border-box;
+            gap: 12px;
+            overflow: hidden;
+            user-select: none;
+            image-rendering: pixelated;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-pixel); }
+        ::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 3px; }
+
+        .column {
+            background: var(--panel-bg);
+            border: 3px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 12px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 6px 0 rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #left-col { flex: 1.1; text-align: center; align-items: center; justify-content: space-between; }
+        #mid-col { flex: 1.4; }
+        #right-col { flex: 1.5; }
+
+        h1, h2, h3 { 
+            font-family: 'Press Start 2P', monospace;
+            color: var(--gold); 
+            margin-top: 0; 
+            font-size: 0.85rem;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0px;
+            text-shadow: 2px 2px 0px #000, 0 0 10px rgba(253, 224, 71, 0.3);
+        }
+
+        .section-box {
+            background: #06040d;
+            border: 2px solid var(--panel-border);
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #realm-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            color: var(--neon-pink);
+            cursor: pointer;
+            text-decoration: underline dotted;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+        #realm-name:hover { color: var(--gold); }
+
+        #quanta-display { 
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.2rem; 
+            color: var(--gold); 
+            text-shadow: 2px 2px 0px #000, 0 0 12px rgba(253, 224, 71, 0.4);
+            margin: 8px 0;
+            position: relative;
+            z-index: 2;
+        }
+        #cps-display { font-size: 0.9rem; color: var(--neon-blue); font-weight: bold; position: relative; z-index: 2; }
+
+        .clicker-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border: 3px solid var(--panel-border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        #space-bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            image-rendering: pixelated;
+        }
+
+        .pixel-harvest-btn {
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.05s;
+        }
+        .pixel-harvest-btn:hover { transform: scale(1.04); }
+        .pixel-harvest-btn:active { transform: scale(0.95); }
+
+        .click-float {
+            position: absolute;
+            color: var(--gold);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            text-shadow: 2px 2px 0px #000;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 10;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+        }
+
+        .pixel-icon {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--accent);
+            background: #090514;
+            margin-right: 12px;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+            border-radius: 4px;
+        }
+
+        .item-card {
+            background: #16102e;
+            border: 2px solid var(--panel-border);
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.5);
+            transition: border-color 0.2s, background 0.2s;
+            border-radius: 4px;
+        }
+        .item-card:hover { border-color: var(--neon-pink); background: #1c153b; }
+        .item-card.locked { opacity: 0.5; filter: grayscale(80%); }
+
+        button.action-btn {
+            background: var(--accent);
+            color: #fff;
+            border: 2px solid #c4b5fd;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            border-radius: 3px;
+        }
+        button.action-btn:hover { background: var(--accent-hover); border-color: var(--gold); }
+        button.action-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+        button:disabled { background: #1a1528 !important; border-color: #2b233e !important; color: #475569 !important; box-shadow: none !important; cursor: not-allowed; }
+
+        .tab-bar { display: flex; gap: 4px; margin-bottom: 10px; }
+        .tab-btn { 
+            flex: 1; 
+            padding: 6px; 
+            background: #0c0819; 
+            color: var(--text-dim); 
+            border: 2px solid var(--panel-border); 
+            cursor: pointer; 
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            border-radius: 3px;
+        }
+        .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--gold); }
+        .tab-pane { display: none; flex: 1; overflow-y: auto; }
+        .tab-pane.active { display: flex; flex-direction: column; }
+
+        .stat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--panel-border); font-size: 0.85rem; }
+        .stat-label { color: var(--text-dim); }
+        .stat-value { font-weight: bold; color: var(--gold); }
+
+        .progress-bar-bg {
+            background: #090514;
+            border: 2px solid var(--panel-border);
+            height: 12px;
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #ec4899, #fde047);
+            height: 100%;
+            width: 0%;
+            transition: width 0.2s ease-out;
+        }
+
+        #notification-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast-notify {
+            background: #110c26;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(253, 224, 71, 0.4);
+            animation: slideIn 0.3s forwards, fadeOut 0.5s 2.5s forwards;
+        }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+
+        #golden-star {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            z-index: 2000;
+            cursor: pointer;
+            display: none;
+            animation: pulseGlow 0.8s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            from { transform: scale(1); filter: drop-shadow(0 0 5px #fde047); }
+            to { transform: scale(1.15); filter: drop-shadow(0 0 15px #ec4899); }
+        }
+
+        #guide-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85);
+            z-index: 2999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--panel-bg);
+            border: 4px solid var(--neon-pink);
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.4);
+            border-radius: 6px;
+        }
+        .guide-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.4; margin: 6px 0; }
+        .guide-text b { color: var(--neon-blue); }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--panel-border);
+            font-size: 0.85rem;
+        }
+        .setting-row-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .setting-desc {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 3px;
+        }
+
+        select.setting-input, input[type="color"].setting-input {
+            background: #090514;
+            color: var(--gold);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 4px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="golden-star" width="32" height="32" onclick="claimGoldenStar()"></canvas>
+    <div id="notification-container"></div>
+
+    <!-- LEFT COLUMN -->
+    <div class="column" id="left-col">
+        <div style="width: 100%; display: flex; justify-content: flex-start; align-items: center; margin-bottom: 5px;">
+            <button class="action-btn" onclick="toggleGuide()" style="background: #2563eb; border-color: #93c5fd; box-shadow: 0 3px 0 #1e40af;">📖 Manual</button>
+        </div>
+
+        <div class="section-box">
+            <div id="realm-name" onclick="renameRealm()">[ Click to Rename Realm ]</div>
+            <h2>Aether Core</h2>
+            <div id="quanta-display">0</div>
+            <div id="cps-display">CPS: 0.0</div>
+            <div id="buff-display" style="font-size: 0.75rem; color: var(--gold); font-weight: bold; margin-top: 4px;"></div>
+        </div>
+        
+        <div class="clicker-container">
+            <canvas id="space-bg-canvas"></canvas>
+            <div class="pixel-harvest-btn" onclick="clickQuanta(event)">
+                <canvas id="harvestCanvas" width="96" height="96" style="image-rendering: pixelated; width: 96px; height: 96px;"></canvas>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <button class="action-btn" onclick="ascend()" style="background: #dc2626; border-color: #fca5a5; width: 100%; padding: 8px; box-shadow: 0 3px 0 #991b1b;">ASCEND (LEGACY)</button>
+            <p style="font-size: 0.75rem; color: var(--text-dim); margin: 6px 0 2px 0;">Legacy Shards: <span id="chips-display" style="color:var(--gold); font-weight:bold;">0</span> (+<span id="chips-pending">0</span>)</p>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="shard-progress-fill"></div>
+            </div>
+            <p style="font-size: 0.65rem; color: var(--neon-blue); margin: 4px 0 0 0;" id="shard-progress-text">Progress to Next Shard: 0%</p>
+        </div>
+    </div>
+
+    <!-- MIDDLE COLUMN -->
+    <div class="column" id="mid-col">
+        <div class="tab-bar">
+            <button class="tab-btn active" id="tab-btn-stats" onclick="switchTab('mid', 'stats-pane')">Analytics</button>
+            <button class="tab-btn" id="tab-btn-settings" onclick="switchTab('mid', 'settings-pane')">Settings</button>
+            <button class="tab-btn" id="tab-btn-minigames" onclick="switchTab('mid', 'minigames-pane')">Flux Core</button>
+            <button class="tab-btn" id="tab-btn-achievements" onclick="switchTab('mid', 'achievements-pane')">Milestones</button>
+        </div>
+
+        <div id="stats-pane" class="tab-pane active">
+            <h3>Real-Time Analytics</h3>
+            <div id="stats-container"></div>
+        </div>
+
+        <div id="settings-pane" class="tab-pane">
+            <h3>Game Settings</h3>
+            <div class="section-box" style="margin-top: 10px;">
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Theme Color:</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input type="color" id="theme-color-picker" class="setting-input" value="#7c3aed" onchange="changeThemeColor(this.value)">
+                            <button class="action-btn" onclick="resetThemeColor()" style="padding: 2px 6px; font-size: 0.65rem;">Reset</button>
+                        </div>
+                    </div>
+                    <span class="setting-desc">Customize the game's primary UI color accent.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Background Color:</span>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <input type="color" id="bg-color-picker" class="setting-input" value="#0d091a" onchange="changeBgColor(this.value)">
+                            <button class="action-btn" onclick="resetBgColor()" style="padding: 2px 6px; font-size: 0.65rem;">Reset</button>
+                        </div>
+                    </div>
+                    <span class="setting-desc">Change the background panel color of the game columns.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Font Style:</span>
+                        <select id="font-selector" class="setting-input" onchange="changeFont(this.value)">
+                            <option value="'Courier New', Courier, monospace">Courier New</option>
+                            <option value="'Press Start 2P', monospace">Press Start 2P</option>
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="Impact, fantasy">Impact</option>
+                        </select>
+                    </div>
+                    <span class="setting-desc">Change the display font for buttons and body text.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Core Object:</span>
+                        <select id="core-selector" class="setting-input" onchange="changeCoreType(this.value)">
+                            <option value="default">Aether Core</option>
+                            <option value="supernova">Red Supernova</option>
+                            <option value="void">Plasma Void</option>
+                            <option value="nebula">Golden Nebula</option>
+                        </select>
+                    </div>
+                    <span class="setting-desc">Choose a space entity to click in the center canvas.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Graphics Mode:</span>
+                        <button class="action-btn" id="gfx-toggle-btn" onclick="toggleGraphicsMode()" style="min-width: 140px;">Visuals On</button>
+                    </div>
+                    <span class="setting-desc">Toggle background animated stars for performance optimization.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Number Format:</span>
+                        <button class="action-btn" id="format-toggle-btn" onclick="toggleNumberFormat()" style="min-width: 140px;">Abbreviated</button>
+                    </div>
+                    <span class="setting-desc">Switch between shorthand notations (e.g., 1.5M) and exact full values.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Click Floats:</span>
+                        <button class="action-btn" id="floats-toggle-btn" onclick="toggleFloats()" style="min-width: 140px;">Enabled</button>
+                    </div>
+                    <span class="setting-desc">Display animated floating numbers over the core when harvesting.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top">
+                        <span>Upgrade Alerts:</span>
+                        <button class="action-btn" id="notify-toggle-btn" onclick="toggleNotifications()" style="min-width: 140px;">Enabled</button>
+                    </div>
+                    <span class="setting-desc">Show pop-up notification toasts when new upgrades become available.</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-row-top" style="gap: 8px;">
+                        <button class="action-btn" onclick="saveGame(true)" style="flex:1;">Save Game</button>
+                        <button class="action-btn" onclick="exportSave()" style="flex:1;">Export</button>
+                        <button class="action-btn" onclick="importSave()" style="flex:1;">Import</button>
+                        <button class="action-btn" onclick="wipeSave()" style="background:#dc2626; border-color:#fca5a5; flex:1;">Wipe</button>
+                    </div>
+                    <span class="setting-desc">Manage game data manually or transfer your progress.</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="minigames-pane" class="tab-pane">
+            <h3>Matrix Resonance</h3>
+            <p style="font-size: 0.8rem; color: var(--text-dim);">Calibrate harmonic frequencies for temporary energy surges.</p>
+            <div style="background: #06040d; border: 2px dashed var(--panel-border); padding: 20px; text-align: center; margin-top: 10px; border-radius: 4px;">
+                <div id="mg-status" style="font-size: 1rem; font-weight: bold; margin-bottom: 12px; color: #4ade80;">Matrix Calibrated</div>
+                <button class="action-btn" id="mg-btn" onclick="triggerOverclock()" style="padding: 10px 20px; font-size: 0.9rem;">Harmonic Surge</button>
+            </div>
+        </div>
+
+        <div id="achievements-pane" class="tab-pane">
+            <div id="achievements-container"></div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="column" id="right-col">
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('right', 'buildings-pane')">Constructs</button>
+            <button class="tab-btn" onclick="switchTab('right', 'upgrades-pane')">Upgrades</button>
+        </div>
+
+        <div id="buildings-pane" class="tab-pane active">
+            <div id="buildings-container"></div>
+        </div>
+
+        <div id="upgrades-pane" class="tab-pane">
+            <div style="margin-bottom: 6px; font-size: 0.75rem; color: var(--text-dim);">Available Technology:</div>
+            <div id="upgrades-container"></div>
+        </div>
+    </div>
+
+    <!-- MANUAL MODAL OVERLAY -->
+    <div id="guide-modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 0.9rem;">Operations Manual</h2>
+                <button class="action-btn" onclick="toggleGuide()" style="background: #dc2626; border-color:#fca5a5; padding: 2px 8px;">X</button>
+            </div>
+            <hr style="border-color: var(--panel-border); margin: 10px 0;">
+            <h3 style="font-size: 0.85rem; color: var(--neon-pink);">📖 How to Play</h3>
+            <p class="guide-text">1. <b>Harvest:</b> Click the main core to harvest Aether Quanta.</p>
+            <p class="guide-text">2. <b>Constructs:</b> Buy structures to build up automated output (CPS).</p>
+            <p class="guide-text">3. <b>Unlocking:</b> Earn more Quanta to discover higher building tiers.</p>
+            <p class="guide-text">4. <b>Ascension:</b> Reset late game for permanent Legacy Shard bonuses.</p>
+
+            <h3 style="font-size: 0.85rem; color: var(--gold); margin-top: 15px;">📊 Quantum Lexicon</h3>
+            <p class="guide-text"><b>k</b> = Thousand (1,000)</p>
+            <p class="guide-text"><b>M</b> = Million (1,000,000)</p>
+            <p class="guide-text"><b>B</b> = Billion (1,000,000,000)</p>
+            <p class="guide-text"><b>T</b> = Trillion (1,000,000,000,000)</p>
+            <p class="guide-text"><b>Qa</b> = Quadrillion (1,000,000,000,000,000)</p>
+            <p class="guide-text"><b>Qi</b> = Quintillion (1,000,000,000,000,000,000)</p>
+            
+            <hr style="border-color: var(--panel-border); margin: 15px 0 10px 0;">
+            <div style="text-align: center; color: var(--gold); font-family: 'Press Start 2P', monospace; font-size: 0.65rem;">
+                Made by Nolan Santamaria
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_THEME_COLOR = '#7c3aed';
+        const DEFAULT_BG_COLOR = '#0d091a';
+
+        let settings = {
+            useLongNumbers: false,
+            performanceMode: false,
+            showFloats: true,
+            showNotifications: true,
+            themeColor: DEFAULT_THEME_COLOR,
+            bgColor: DEFAULT_BG_COLOR,
+            fontStyle: "'Courier New', Courier, monospace",
+            coreType: 'default'
+        };
+
+        let game = {
+            realmName: "Celestial Realm",
+            quanta: 0,
+            totalEarned: 0,
+            manualEarned: 0,
+            totalClicks: 0,
+            goldenStarsOpened: 0,
+            timePlayed: 0,
+            cps: 0,
+            cpc: 1,
+            chips: 0,
+            buffType: null,
+            buffMultiplier: 1,
+            clickMultiplier: 1,
+            boostedBuildingId: null,
+            boostedBuildingMult: 1,
+            buffTime: 0,
+            buildings: [],
+            upgrades: [],
+            achievements: []
+        };
+
+        function formatNumber(num) {
+            if (settings.useLongNumbers) return Math.floor(num).toLocaleString('en-US');
+            if (num < 1000) return num.toFixed(num % 1 === 0 ? 0 : 1);
+            const suffixes = ["", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+            let i = Math.floor(Math.log10(num) / 3);
+            if (i >= suffixes.length) return num.toExponential(2).replace('e+', 'E');
+            let val = num / Math.pow(10, i * 3);
+            return `${val.toFixed(2)}${suffixes[i]}`;
+        }
+
+        function changeThemeColor(hex) {
+            settings.themeColor = hex;
+            document.documentElement.style.setProperty('--accent', hex);
+            
+            let c = hex.replace('#', '');
+            let r = Math.max(0, parseInt(c.substring(0,2), 16) - 40);
+            let g = Math.max(0, parseInt(c.substring(2,4), 16) - 40);
+            let b = Math.max(0, parseInt(c.substring(4,6), 16) - 40);
+            let darkerHex = `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+            document.documentElement.style.setProperty('--accent-hover', darkerHex);
+            renderBuildings();
+        }
+
+        function resetThemeColor() {
+            document.getElementById('theme-color-picker').value = DEFAULT_THEME_COLOR;
+            changeThemeColor(DEFAULT_THEME_COLOR);
+        }
+
+        function changeBgColor(hex) {
+            settings.bgColor = hex;
+            document.documentElement.style.setProperty('--panel-bg', hex);
+        }
+
+        function resetBgColor() {
+            document.getElementById('bg-color-picker').value = DEFAULT_BG_COLOR;
+            changeBgColor(DEFAULT_BG_COLOR);
+        }
+
+        function changeFont(fontStr) {
+            settings.fontStyle = fontStr;
+            document.documentElement.style.setProperty('--main-font', fontStr);
+        }
+
+        function changeCoreType(type) {
+            settings.coreType = type;
+            drawHarvestCore();
+        }
+
+        function toggleNumberFormat() {
+            settings.useLongNumbers = !settings.useLongNumbers;
+            document.getElementById('format-toggle-btn').innerText = settings.useLongNumbers ? "Full Numbers" : "Abbreviated";
+            updateDisplay();
+            renderBuildings();
+            renderUpgrades();
+            renderAchievements();
+        }
+
+        function toggleGraphicsMode() {
+            settings.performanceMode = !settings.performanceMode;
+            document.getElementById('gfx-toggle-btn').innerText = settings.performanceMode ? "Performance" : "Visuals On";
+            let spaceBg = document.getElementById('space-bg-canvas');
+            if (spaceBg) spaceBg.style.display = settings.performanceMode ? 'none' : 'block';
+        }
+
+        function toggleFloats() {
+            settings.showFloats = !settings.showFloats;
+            document.getElementById('floats-toggle-btn').innerText = settings.showFloats ? "Enabled" : "Disabled";
+        }
+
+        function toggleNotifications() {
+            settings.showNotifications = !settings.showNotifications;
+            document.getElementById('notify-toggle-btn').innerText = settings.showNotifications ? "Enabled" : "Disabled";
+        }
+
+        function showNotification(msg) {
+            if (!settings.showNotifications) return;
+            let container = document.getElementById('notification-container');
+            let toast = document.createElement('div');
+            toast.className = 'toast-notify';
+            toast.innerText = `✨ UNLOCKED: ${msg}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function drawThemedSprite(canvasId, index) {
+            let canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            let ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, 32, 32);
+
+            let themeId = Math.floor(index / 5) % 10;
+            let themes = [
+                { bg: '#090518', colors: ['#fde047', '#f97316', '#ffffff'] },
+                { bg: '#04101e', colors: ['#38bdf8', '#0284c7', '#34d399'] },
+                { bg: '#16041e', colors: ['#c084fc', '#7e22ce', '#ec4899'] },
+                { bg: '#1c0a00', colors: ['#ff7a00', '#b91c1c', '#fef08a'] },
+                { bg: '#021812', colors: ['#34d399', '#047857', '#a7f3d0'] },
+                { bg: '#0a0d2c', colors: ['#818cf8', '#3730a3', '#e0e7ff'] },
+                { bg: '#1a0518', colors: ['#f472b6', '#9d174d', '#fbcfe8'] },
+                { bg: '#0d131a', colors: ['#94a3b8', '#334155', '#f8fafc'] },
+                { bg: '#200505', colors: ['#f87171', '#991b1b', '#fef2f2'] },
+                { bg: '#021a1a', colors: ['#2dd4bf', '#0f766e', '#ccfbf1'] }
+            ];
+
+            let theme = themes[themeId];
+            ctx.fillStyle = theme.bg;
+            ctx.fillRect(0, 0, 32, 32);
+
+            let subIndex = index % 5; 
+            for (let x = 1; x < 31; x++) {
+                for (let y = 1; y < 31; y++) {
+                    let dx = x - 15.5;
+                    let dy = y - 15.5;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    let hash = Math.sin(index * 99 + x * 17 + y * 31) * 10000;
+                    hash = hash - Math.floor(hash);
+
+                    let drawPixel = false;
+                    if (subIndex === 0 && dist < 11 - (index % 3)) drawPixel = true;
+                    else if (subIndex === 1 && Math.abs(dx) + Math.abs(dy) < 13 - (index % 2)) drawPixel = true;
+                    else if (subIndex === 2 && ((Math.abs(dx) < 3 && Math.abs(dy) < 13) || (Math.abs(dy) < 3 && Math.abs(dx) < 13))) drawPixel = true;
+                    else if (subIndex === 3 && dist > 5 && dist < 12) drawPixel = true;
+                    else if (subIndex === 4 && (Math.sqrt((dx-4)*(dx-4) + dy*dy) < 6 || Math.sqrt((dx+4)*(dx+4) + dy*dy) < 6)) drawPixel = true;
+
+                    if (drawPixel) {
+                        ctx.fillStyle = hash > 0.6 ? theme.colors[2] : (hash > 0.3 ? theme.colors[0] : theme.colors[1]);
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+        }
+
+        function initSpaceBackground() {
+            let canvas = document.getElementById('space-bg-canvas');
+            let ctx = canvas.getContext('2d');
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+
+            let stars = [];
+            for (let i = 0; i < 50; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() > 0.85 ? 2 : 1,
+                    color: ['#ffffff', '#fde047', '#38bdf8', '#ec4899'][Math.floor(Math.random() * 4)],
+                    speed: 0.15 + Math.random() * 0.4
+                });
+            }
+
+            function animateSpace() {
+                if (!settings.performanceMode) {
+                    ctx.fillStyle = '#05020c';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    stars.forEach(s => {
+                        s.y += s.speed;
+                        if (s.y > canvas.height) s.y = 0;
+                        ctx.fillStyle = s.color;
+                        ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size);
+                    });
+                }
+                requestAnimationFrame(animateSpace);
+            }
+            animateSpace();
+        }
+
+        function drawHarvestCore() {
+            let canvas = document.getElementById('harvestCanvas');
+            let ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, 96, 96);
+
+            let mode = settings.coreType;
+
+            for (let x = 0; x < 96; x++) {
+                for (let y = 0; y < 96; y++) {
+                    let dx = x - 47.5;
+                    let dy = y - 47.5;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+
+                    if (mode === 'supernova') {
+                        if (dist < 42) {
+                            if (dist < 18) ctx.fillStyle = (x + y) % 2 === 0 ? '#ffffff' : '#fca5a5';
+                            else if (dist < 34) ctx.fillStyle = (x + y) % 2 === 0 ? '#ef4444' : '#b91c1c';
+                            else ctx.fillStyle = '#450a0a';
+                            ctx.fillRect(x, y, 1, 1);
+                        } else if (dist < 46 && (x + y) % 3 === 0) {
+                            ctx.fillStyle = '#f97316';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    } else if (mode === 'void') {
+                        if (dist < 42) {
+                            if (dist < 14) ctx.fillStyle = '#000000';
+                            else if (dist < 32) ctx.fillStyle = (x + y) % 2 === 0 ? '#06b6d4' : '#3b82f6';
+                            else ctx.fillStyle = '#1e1b4b';
+                            ctx.fillRect(x, y, 1, 1);
+                        } else if (dist < 46 && (x + y) % 2 === 0) {
+                            ctx.fillStyle = '#a855f7';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    } else if (mode === 'nebula') {
+                        if (dist < 42) {
+                            if (dist < 22) ctx.fillStyle = (x + y) % 2 === 0 ? '#ffffff' : '#fde047';
+                            else if (dist < 36) ctx.fillStyle = (x + y) % 2 === 0 ? '#eab308' : '#ca8a04';
+                            else ctx.fillStyle = '#713f12';
+                            ctx.fillRect(x, y, 1, 1);
+                        } else if (dist < 46 && (x + y) % 2 === 0) {
+                            ctx.fillStyle = '#facc15';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    } else { // Default Aether Core
+                        if (dist < 42) {
+                            if (dist < 20) ctx.fillStyle = (x + y) % 2 === 0 ? '#ffffff' : '#fde047';
+                            else if (dist < 34) ctx.fillStyle = (x + y) % 2 === 0 ? '#a855f7' : '#ec4899';
+                            else ctx.fillStyle = '#3b0764';
+                            ctx.fillRect(x, y, 1, 1);
+                        } else if (dist < 46 && (x + y) % 3 === 0) {
+                            ctx.fillStyle = '#38bdf8';
+                            ctx.fillRect(x, y, 1, 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawGoldenStarSprite() {
+            let canvas = document.getElementById('golden-star');
+            let ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            for(let x=0; x<32; x++) {
+                for(let y=0; y<32; y++) {
+                    let dx = x - 15.5;
+                    let dy = y - 15.5;
+                    if ((Math.abs(dx) < 3 && Math.abs(dy) < 14) || (Math.abs(dy) < 3 && Math.abs(dx) < 14) || (Math.abs(dx) + Math.abs(dy) < 10)) {
+                        ctx.fillStyle = (x+y)%2===0 ? '#fde047' : '#ffffff';
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+        }
+
+        const buildingNames = [
+            "Starlight Collector", "Solar Filament", "Nebula Spark", "Nova Harvester", "Astral Beacon",
+            "Terrene Drill", "Gas Giant Siphon", "Ring Matrix", "Crater Press", "Orbital Rig",
+            "Void Siphon", "Dark Matter Well", "Shadow Weaver", "Null Catalyst", "Abyssal Core",
+            "Plasma Foundry", "Thermal Engine", "Fusion Spindle", "Hyper-Dynamo", "Core Igniter",
+            "Prismatic Lens", "Crystal Relay", "Aether Chisel", "Relic Vault", "Runic Spire",
+            "Chrono Gear", "Temporal Loom", "Warp Anchor", "Paradox Rig", "Eternity Fold",
+            "Quark Splitter", "Flux Capacitor", "Entangled Array", "Subatomic Weaver", "Matrix Core",
+            "Event Horizon", "Black Hole Harness", "Singularity Pump", "Cosmic Weaver", "Omni Engine",
+            "Dimension Gate", "Multiverse Bridge", "Alpha Generator", "Omega Reactor", "Genesis Chamber",
+            "Infinity Loop", "Tachyon Forge", "God Particle Loom", "Aether Prime", "The Core Source"
+        ];
+
+        const milestoneNames = [
+            "Starlight Awakening", "Orbital Genesis", "Void Breakthrough", "Thermal Catalyst",
+            "Crystal Ascension", "Temporal Distortion", "Quantum Resonance", "Event Horizon",
+            "Multiverse Dominance", "Omniverse Singularity", "Cosmic Transcendence", "Godhead Source"
+        ];
+
+        for (let i = 0; i < 50; i++) {
+            let baseCost = Math.floor(30 * Math.pow(5.2, i / 1.1));
+            let baseCps = Math.floor(1.5 * Math.pow(3.0, i));
+            game.buildings.push({
+                id: i,
+                name: buildingNames[i],
+                cost: baseCost,
+                baseCost: baseCost,
+                cps: baseCps,
+                owned: 0,
+                unlockEarnedReq: i === 0 ? 0 : Math.floor(baseCost * 0.4)
+            });
+        }
+
+        for (let b = 0; b < 50; b++) {
+            for (let t = 1; t <= 5; t++) {
+                let uId = b * 5 + (t - 1);
+                let rawCost = Math.floor(game.buildings[b].baseCost * Math.pow(10, t));
+                game.upgrades.push({
+                    id: uId,
+                    name: `${game.buildings[b].name} Phase${t}`,
+                    cost: rawCost,
+                    target: b,
+                    tier: t,
+                    bought: false,
+                    unlocked: false
+                });
+            }
+        }
+
+        for (let i = 0; i < milestoneNames.length; i++) {
+            game.achievements.push({
+                id: i,
+                name: milestoneNames[i],
+                desc: `Reach total yield milestone #${i + 1}.`,
+                target: Math.floor(1000 * Math.pow(12, i)),
+                unlocked: false
+            });
+        }
+
+        function renameRealm() {
+            let newName = prompt("Enter your new Realm Name:", game.realmName);
+            if (newName && newName.trim() !== "") {
+                game.realmName = newName.trim();
+                document.getElementById('realm-name').innerText = game.realmName;
+            }
+        }
+
+        function toggleGuide() {
+            let modal = document.getElementById('guide-modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function clickQuanta(event) {
+            let gain = game.cpc * (1 + game.chips * 0.05) * game.buffMultiplier * game.clickMultiplier;
+            game.quanta += gain;
+            game.totalEarned += gain;
+            game.manualEarned += gain;
+            game.totalClicks++;
+
+            if (event && settings.showFloats) {
+                let floatEl = document.createElement('div');
+                floatEl.className = 'click-float';
+                floatEl.innerText = `+${formatNumber(gain)}`;
+                floatEl.style.left = `${event.clientX - 15}px`;
+                floatEl.style.top = `${event.clientY - 15}px`;
+                document.body.appendChild(floatEl);
+                setTimeout(() => floatEl.remove(), 600);
+            }
+            updateDisplay();
+            updateButtonStates();
+        }
+
+        function buyBuilding(id) {
+            let b = game.buildings[id];
+            if (game.quanta >= b.cost) {
+                game.quanta -= b.cost;
+                b.owned++;
+                b.cost = Math.floor(b.baseCost * Math.pow(1.16, b.owned));
+                
+                game.upgrades.forEach(u => {
+                    if (u.target === id && b.owned >= u.tier * 5 && !u.unlocked && !u.bought) {
+                        u.unlocked = true;
+                        showNotification(u.name);
+                    }
+                });
+
+                recalculateCPS();
+                renderBuildings();
+                renderUpgrades();
+            }
+        }
+
+        function buyUpgrade(id) {
+            let u = game.upgrades[id];
+            if (!u.bought && game.quanta >= u.cost) {
+                game.quanta -= u.cost;
+                u.bought = true;
+                recalculateCPS();
+                renderUpgrades();
+            }
+        }
+
+        function recalculateCPS() {
+            let totalCPS = 0;
+            game.buildings.forEach(b => {
+                let buildingUpgrades = game.upgrades.filter(u => u.target === b.id && u.bought);
+                let mult = 1;
+                buildingUpgrades.forEach(() => mult *= 2.0);
+                
+                if (game.boostedBuildingId === b.id) {
+                    mult *= game.boostedBuildingMult;
+                }
+
+                totalCPS += (b.cps * b.owned * mult);
+            });
+            game.cps = totalCPS * (1 + game.chips * 0.05) * game.buffMultiplier;
+        }
+
+        function ascend() {
+            let pendingChips = Math.floor(Math.sqrt(game.totalEarned / 1e9));
+            if (pendingChips > 0) {
+                game.chips += pendingChips;
+                game.quanta = 0;
+                game.totalEarned = 0;
+                game.cps = 0;
+                game.buildings.forEach((b) => { b.owned = 0; b.cost = b.baseCost; });
+                game.upgrades.forEach(u => { u.bought = false; u.unlocked = false; });
+                alert(`Ascended! Claimed ${pendingChips} Legacy Shards.`);
+                recalculateCPS();
+                renderBuildings();
+                renderUpgrades();
+                saveGame();
+            } else {
+                alert("Earn at least 1 Billion total Quanta before your first ascension.");
+            }
+        }
+
+        function spawnGoldenStar() {
+            let star = document.getElementById('golden-star');
+            let rx = Math.floor(Math.random() * (window.innerWidth - 60));
+            let ry = Math.floor(Math.random() * (window.innerHeight - 60));
+            star.style.left = `${rx}px`;
+            star.style.top = `${ry}px`;
+            star.style.display = 'block';
+
+            setTimeout(() => {
+                if (star.style.display === 'block') star.style.display = 'none';
+            }, 10000);
+        }
+
+        function claimGoldenStar() {
+            document.getElementById('golden-star').style.display = 'none';
+            game.goldenStarsOpened++;
+
+            let roll = Math.random();
+            if (roll < 0.30) {
+                game.buffType = "CLICK FRENZY";
+                game.clickMultiplier = 777;
+                game.buffTime = 10;
+                showNotification("⚡ 777x CLICK POWER (10s)!");
+            } else if (roll < 0.60) {
+                game.buffType = "HYPERDRIVE";
+                game.buffMultiplier = 7;
+                game.buffTime = 15;
+                showNotification("🚀 7x PRODUCTION HYPERDRIVE (15s)!");
+            } else {
+                let ownedBuildings = game.buildings.filter(b => b.owned > 0);
+                let targetBuilding = ownedBuildings.length > 0 
+                    ? ownedBuildings[Math.floor(Math.random() * ownedBuildings.length)]
+                    : game.buildings[0];
+
+                let randomMultiplier = Math.floor(Math.random() * 29) + 2;
+                let percentageBoost = randomMultiplier * 100;
+
+                game.boostedBuildingId = targetBuilding.id;
+                game.boostedBuildingMult = 1 + (percentageBoost / 100);
+                game.buffType = `${targetBuilding.name.toUpperCase()} SURGE (+${percentageBoost}%)`;
+                game.buffTime = 30;
+
+                showNotification(`✨ +${percentageBoost}\%${targetBuilding.name} CPS (30s)!`);
+            }
+
+            recalculateCPS();
+        }
+
+        setInterval(() => {
+            if (Math.random() < 0.08) spawnGoldenStar();
+        }, 60000);
+
+        let mgActive = false;
+        function triggerOverclock() {
+            if (!mgActive) {
+                mgActive = true;
+                document.getElementById('mg-status').innerText = "SURGE ACTIVE!";
+                document.getElementById('mg-btn').innerText = "Cooling...";
+                game.quanta += Math.max(1000, game.cps * 60);
+                setTimeout(() => {
+                    mgActive = false;
+                    document.getElementById('mg-status').innerText = "Matrix Calibrated";
+                    document.getElementById('mg-btn').innerText = "Harmonic Surge";
+                }, 15000);
+            }
+        }
+
+        function switchTab(column, paneId) {
+            let col = document.getElementById(column === 'mid' ? 'mid-col' : 'right-col');
+            col.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            col.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(paneId).classList.add('active');
+            
+            let btnId = 'tab-btn-' + paneId.replace('-pane', '');
+            let btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
+
+            if (paneId === 'stats-pane') renderStats();
+        }
+
+        function renderBuildings() {
+            let container = document.getElementById('buildings-container');
+            container.innerHTML = '';
+            game.buildings.forEach(b => {
+                let isUnlocked = game.totalEarned >= b.unlockEarnedReq || b.owned > 0;
+                if (isUnlocked) {
+                    container.innerHTML += `
+                        <div class="item-card">
+                            <div style="display:flex; align-items:center;">
+                                <canvas id="b_icon_${b.id}" class="pixel-icon" width="32" height="32"></canvas>
+                                <div>
+                                    <strong style="color:var(--gold); font-size:0.85rem;">${b.name}</strong> <span style="color:var(--neon-blue);">[${b.owned}]</span><br>
+                                    <small style="color:var(--text-dim); font-size:0.75rem;">Cost: ${formatNumber(b.cost)} \vert{} +${formatNumber(b.cps)} CPS</small>
+                                </div>
+                            </div>
+                            <button class="action-btn b-buy-btn" data-id="${b.id}" onclick="buyBuilding(${b.id})" ${game.quanta < b.cost ? 'disabled' : ''}>Buy</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <div class="item-card locked">
+                            <div style="display:flex; align-items:center;">
+                                <div class="pixel-icon" style="display:flex; align-items:center; justify-content:center; color:var(--text-dim);">?</div>
+                                <div>
+                                    <strong style="color:var(--text-dim); font-size:0.85rem;">??? Locked ???</strong><br>
+                                    <small style="color:var(--text-dim); font-size:0.75rem;">Earn more Quanta to discover</small>
+                                </div>
+                            </div>
+                            <button class="action-btn" disabled>Locked</button>
+                        </div>
+                    `;
+                }
+            });
+
+            game.buildings.forEach(b => {
+                if (game.totalEarned >= b.unlockEarnedReq || b.owned > 0) {
+                    drawThemedSprite(`b_icon_${b.id}`, b.id);
+                }
+            });
+        }
+
+        function renderUpgrades() {
+            let container = document.getElementById('upgrades-container');
+            container.innerHTML = '';
+            let count = 0;
+            for (let u of game.upgrades) {
+                if (u.unlocked && !u.bought) {
+                    container.innerHTML += `
+                        <div class="item-card">
+                            <div>
+                                <strong style="font-size:0.8rem; color:var(--text-main);">${u.name}</strong><br>
+                                <small style="color:var(--text-dim); font-size:0.7rem;">Cost: ${formatNumber(u.cost)}</small>
+                            </div>
+                            <button class="action-btn u-buy-btn" data-id="${u.id}" onclick="buyUpgrade(${u.id})" ${game.quanta < u.cost ? 'disabled' : ''}>Unlock</button>
+                        </div>
+                    `;
+                    count++;
+                    if (count > 20) break;
+                }
+            }
+        }
+
+        function updateButtonStates() {
+            document.querySelectorAll('.b-buy-btn').forEach(btn => {
+                let id = parseInt(btn.getAttribute('data-id'));
+                if (!isNaN(id) && game.buildings[id]) {
+                    btn.disabled = game.quanta < game.buildings[id].cost;
+                }
+            });
+
+            document.querySelectorAll('.u-buy-btn').forEach(btn => {
+                let id = parseInt(btn.getAttribute('data-id'));
+                if (!isNaN(id) && game.upgrades[id]) {
+                    btn.disabled = game.quanta < game.upgrades[id].cost;
+                }
+            });
+        }
+
+        function renderAchievements() {
+            let container = document.getElementById('achievements-container');
+            container.innerHTML = '';
+            game.achievements.forEach(a => {
+                container.innerHTML += `
+                    <div class="item-card" style="opacity: ${a.unlocked ? 1 : 0.4}">
+                        <div>
+                            <strong style="font-size:0.8rem; color:var(--gold);">${a.name}</strong><br>
+                            <small style="color:var(--text-dim); font-size:0.7rem;">${a.desc}</small>
+                        </div>
+                        <div>${a.unlocked ? '✅' : '🔒'}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderStats() {
+            let container = document.getElementById('stats-container');
+            let days = Math.floor(game.timePlayed / 86400);
+            let hours = Math.floor((game.timePlayed % 86400) / 3600);
+            let minutes = Math.floor((game.timePlayed % 3600) / 60);
+            let seconds = Math.floor(game.timePlayed % 60);
+
+            let totalBuildingsOwned = game.buildings.reduce((sum, b) => sum + b.owned, 0);
+            let activeMult = (1 + game.chips * 0.05) * game.buffMultiplier;
+
+            container.innerHTML = `
+                <div class="stat-row"><span class="stat-label">Playtime:</span> <span class="stat-value">${days}d${hours}h ${minutes}m${seconds}s</span></div>
+                <div class="stat-row"><span class="stat-label">Current Multiplier:</span> <span class="stat-value">${activeMult.toFixed(2)}x</span></div>
+                <div class="stat-row"><span class="stat-label">Total Harvested:</span> <span class="stat-value">${formatNumber(game.totalEarned)}</span></div>
+                <div class="stat-row"><span class="stat-label">Manual Harvested:</span> <span class="stat-value">${formatNumber(game.manualEarned)}</span></div>
+                <div class="stat-row"><span class="stat-label">Total Clicks:</span> <span class="stat-value">${game.totalClicks.toLocaleString()}</span></div>
+                <div class="stat-row"><span class="stat-label">Golden Stars Harvested:</span> <span class="stat-value">${game.goldenStarsOpened.toLocaleString()}</span></div>
+                <div class="stat-row"><span class="stat-label">Buildings Owned:</span> <span class="stat-value">${totalBuildingsOwned.toLocaleString()}</span></div>
+            `;
+        }
+
+        function updateDisplay() {
+            document.getElementById('quanta-display').innerText = formatNumber(game.quanta);
+            document.getElementById('cps-display').innerText = `CPS: ${formatNumber(game.cps)}`;
+            document.getElementById('chips-display').innerText = game.chips;
+            
+            let pendingChips = Math.floor(Math.sqrt(game.totalEarned / 1e9));
+            document.getElementById('chips-pending').innerText = formatNumber(pendingChips);
+
+            let targetShardReq = Math.pow(pendingChips + 1, 2) * 1e9;
+            let currentProgress = Math.min(100, Math.max(0, (game.totalEarned / targetShardReq) * 100));
+            document.getElementById('shard-progress-fill').style.width = `${currentProgress.toFixed(1)}%`;
+            document.getElementById('shard-progress-text').innerText = `Progress to Next Shard: ${currentProgress.toFixed(1)}%`;
+
+            if (game.buffTime > 0) {
+                document.getElementById('buff-display').innerText = `⚡ ${game.buffType} (${game.buffTime.toFixed(1)}s)`;
+            } else {
+                document.getElementById('buff-display').innerText = ``;
+            }
+        }
+
+        function saveGame(manual = false) {
+            let saveData = {
+                settings: settings,
+                game: {
+                    realmName: game.realmName,
+                    quanta: game.quanta,
+                    totalEarned: game.totalEarned,
+                    manualEarned: game.manualEarned,
+                    totalClicks: game.totalClicks,
+                    goldenStarsOpened: game.goldenStarsOpened,
+                    timePlayed: game.timePlayed,
+                    chips: game.chips,
+                    buildings: game.buildings.map(b => ({ owned: b.owned, cost: b.cost })),
+                    upgrades: game.upgrades.map(u => ({ bought: u.bought, unlocked: u.unlocked })),
+                    achievements: game.achievements.map(a => ({ unlocked: a.unlocked }))
+                }
+            };
+            localStorage.setItem('aetherium_pixel_save', JSON.stringify(saveData));
+            if (manual) showNotification("Game Saved Successfully!");
+        }
+
+        function loadGame() {
+            let raw = localStorage.getItem('aetherium_pixel_save');
+            if (!raw) return;
+            try {
+                let parsed = JSON.parse(raw);
+                if (parsed.settings) {
+                    settings = { ...settings, ...parsed.settings };
+                    document.getElementById('theme-color-picker').value = settings.themeColor || DEFAULT_THEME_COLOR;
+                    document.getElementById('bg-color-picker').value = settings.bgColor || DEFAULT_BG_COLOR;
+                    document.getElementById('font-selector').value = settings.fontStyle;
+                    document.getElementById('core-selector').value = settings.coreType;
+                    changeThemeColor(settings.themeColor || DEFAULT_THEME_COLOR);
+                    changeBgColor(settings.bgColor || DEFAULT_BG_COLOR);
+                    changeFont(settings.fontStyle);
+                }
+                if (parsed.game) {
+                    game.realmName = parsed.game.realmName || game.realmName;
+                    game.quanta = parsed.game.quanta || 0;
+                    game.totalEarned = parsed.game.totalEarned || 0;
+                    game.manualEarned = parsed.game.manualEarned || 0;
+                    game.totalClicks = parsed.game.totalClicks || 0;
+                    game.goldenStarsOpened = parsed.game.goldenStarsOpened || 0;
+                    game.timePlayed = parsed.game.timePlayed || 0;
+                    game.chips = parsed.game.chips || 0;
+
+                    if (parsed.game.buildings) {
+                        parsed.game.buildings.forEach((b, i) => {
+                            if (game.buildings[i]) {
+                                game.buildings[i].owned = b.owned;
+                                game.buildings[i].cost = b.cost;
+                            }
+                        });
+                    }
+                    if (parsed.game.upgrades) {
+                        parsed.game.upgrades.forEach((u, i) => {
+                            if (game.upgrades[i]) {
+                                game.upgrades[i].bought = u.bought;
+                                game.upgrades[i].unlocked = u.unlocked;
+                            }
+                        });
+                    }
+                    if (parsed.game.achievements) {
+                        parsed.game.achievements.forEach((a, i) => {
+                            if (game.achievements[i]) game.achievements[i].unlocked = a.unlocked;
+                        });
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to load save data", e);
+            }
+        }
+
+        function exportSave() {
+            saveGame();
+            let raw = localStorage.getItem('aetherium_pixel_save');
+            let encoded = btoa(raw);
+            prompt("Copy your export string:", encoded);
+        }
+
+        function importSave() {
+            let str = prompt("Paste your export string here:");
+            if (str) {
+                try {
+                    let decoded = atob(str);
+                    JSON.parse(decoded);
+                    localStorage.setItem('aetherium_pixel_save', decoded);
+                    location.reload();
+                } catch(e) {
+                    alert("Invalid save string!");
+                }
+            }
+        }
+
+        function wipeSave() {
+            if (confirm("Are you sure you want to completely wipe your save? This cannot be undone!")) {
+                localStorage.removeItem('aetherium_pixel_save');
+                location.reload();
+            }
+        }
+
+        setInterval(() => saveGame(), 5000);
+
+        let lastTime = performance.now();
+        let statTimer = 0;
+        function gameLoop(now) {
+            let delta = (now - lastTime) / 1000;
+            lastTime = now;
+
+            if (delta > 0) {
+                if (game.buffTime > 0) {
+                    game.buffTime -= delta;
+                    if (game.buffTime <= 0) {
+                        game.buffTime = 0;
+                        game.buffType = null;
+                        game.buffMultiplier = 1;
+                        game.clickMultiplier = 1;
+                        game.boostedBuildingId = null;
+                        game.boostedBuildingMult = 1;
+                        recalculateCPS();
+                    }
+                }
+
+                game.quanta += game.cps * delta;
+                game.totalEarned += game.cps * delta;
+                game.timePlayed += delta;
+
+                game.achievements.forEach(a => {
+                    if (!a.unlocked && game.totalEarned >= a.target) {
+                        a.unlocked = true;
+                        renderAchievements();
+                    }
+                });
+
+                updateDisplay();
+                updateButtonStates();
+
+                statTimer += delta;
+                if (statTimer >= 1.0) {
+                    statTimer = 0;
+                    let statsPane = document.getElementById('stats-pane');
+                    if (statsPane && statsPane.classList.contains('active')) {
+                        renderStats();
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.addEventListener('load', () => {
+            loadGame();
+
+            document.getElementById('realm-name').innerText = game.realmName;
+            initSpaceBackground();
+            drawHarvestCore();
+            drawGoldenStarSprite();
+            
+            recalculateCPS();
+            renderBuildings();
+            renderUpgrades();
+            renderAchievements();
+
+            let bPane = document.getElementById('buildings-pane');
+            if (bPane) bPane.scrollTop = 0;
+
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+</body>
+</html>
